@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Toggle Button</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      cursor: none;
+    }
+    
+    .container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+    
+    .toggle-container {
+      position: relative;
+      width: 160px;
+      height: 80px;
+      border-radius: 40px;
+      background: #111;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 
+                  inset 0 -5px 15px rgba(255, 255, 255, 0.05),
+                  inset 0 5px 15px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+      transform: perspective(1000px) rotateX(10deg);
+    }
+    
+    .toggle-container:active {
+      transform: perspective(1000px) rotateX(15deg) scale(0.95);
+    }
+    
+    .toggle-button {
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(145deg, #f5f5f5, #e0e0e0);
+      border-radius: 50%;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3),
+                  inset 0 -3px 8px rgba(0, 0, 0, 0.2),
+                  inset 0 3px 8px rgba(255, 255, 255, 0.6);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform: translateZ(10px);
+    }
+    
+    .toggle-container.active .toggle-button {
+      left: calc(100% - 75px);
+      background: linear-gradient(145deg, #ff9999, #ff5555);
+      box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3),
+                  inset 0 -3px 8px rgba(0, 0, 0, 0.2),
+                  inset 0 3px 8px rgba(255, 255, 255, 0.6);
+    }
+    
+    .toggle-container:not(.active) .toggle-button {
+      background: linear-gradient(145deg, #99ff99, #55ff55);
+      box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3),
+                  inset 0 -3px 8px rgba(0, 0, 0, 0.2),
+                  inset 0 3px 8px rgba(255, 255, 255, 0.6);
+    }
+    
+    .status-text {
+      font-size: 32px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      transition: all 0.4s ease;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    
+    .status-text.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .glow {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      opacity: 0.7;
+    }
+    
+    /* 3D effect elements */
+    .toggle-container::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 40px;
+      background: rgba(0, 0, 0, 0.1);
+      transform: translateZ(-5px) translateY(5px);
+      filter: blur(10px);
+      z-index: -1;
+    }
+    
+    .toggle-button::after {
+      content: '';
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      top: 15%;
+      left: 25%;
+      filter: blur(5px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="toggle-container">
+      <div class="toggle-button"></div>
+    </div>
+    <div class="status-text">his fav</div>
+  </div>
+  
+  <div class="glow"></div>
+  
+  <script>
+    const toggleContainer = document.querySelector('.toggle-container');
+    const statusText = document.querySelector('.status-text');
+    const glow = document.querySelector('.glow');
+    
+    // Initialize state
+    let isOn = false;
+    updateState();
+    
+    // Toggle button click event
+    toggleContainer.addEventListener('click', () => {
+      isOn = !isOn;
+      updateState();
+    });
+    
+    function updateState() {
+      if (isOn) {
+        toggleContainer.classList.add('active');
+        statusText.textContent = 'her fav';
+        statusText.style.color = '#ff6b6b';
+      } else {
+        toggleContainer.classList.remove('active');
+        statusText.textContent = 'his fav';
+        statusText.style.color = '#6bff6b';
+      }
+      
+      // Show text with animation
+      statusText.classList.remove('visible');
+      setTimeout(() => {
+        statusText.classList.add('visible');
+      }, 50);
+    }
+    
+    // Mouse tracking glow effect
+    document.addEventListener('mousemove', (e) => {
+      // Update glow position
+      glow.style.left = `${e.clientX}px`;
+      glow.style.top = `${e.clientY}px`;
+      
+      // 3D tilt effect on button based on mouse position
+      const rect = toggleContainer.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      const maxTilt = 15;
+      const tiltX = ((e.clientY - centerY) / window.innerHeight) * maxTilt;
+      const tiltY = ((centerX - e.clientX) / window.innerWidth) * maxTilt;
+      
+      // Only apply tilt when mouse is somewhat close to the button
+      const distance = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
+      const maxDistance = Math.max(window.innerWidth, window.innerHeight) / 2;
+      const tiltFactor = 1 - Math.min(distance / maxDistance, 1);
+      
+      toggleContainer.style.transform = `perspective(1000px) rotateX(${tiltX * tiltFactor + 10}deg) rotateY(${tiltY * tiltFactor}deg)`;
+      
+      // Change glow color based on button state
+      if (isOn) {
+        glow.style.background = 'radial-gradient(circle, rgba(255, 100, 100, 0.8) 0%, rgba(255, 100, 100, 0) 70%)';
+      } else {
+        glow.style.background = 'radial-gradient(circle, rgba(100, 255, 100, 0.8) 0%, rgba(100, 255, 100, 0) 70%)';
+      }
+    });
+    
+    // Initialize text visibility after a small delay
+    setTimeout(() => {
+      statusText.classList.add('visible');
+    }, 500);
+  </script>
+</body>
+</html>
